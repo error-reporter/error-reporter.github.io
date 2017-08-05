@@ -14,4 +14,4 @@ Changes were made by Ilya Ig. Petrov: title "Error" was added above the ghost.
 
 #### Circled PacMan Icon
 
-Icon made by Ilya Ig. Petrov in Inkscape and Gimp editors.
+Icon made by Ilya Ig. Petrov in Inkscape and Gimp editors. Ilya grants this work to Public Domain, contact him for details.
