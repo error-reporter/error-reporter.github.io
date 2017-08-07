@@ -1,55 +1,107 @@
 'use strict';
 // This code is very old, I'm sorry you have to deal with it.
 
-/* global Raven:false, hljs:false */
-+function() {
+/* global hljs:false */
+(function() {
 
   const params = new URL(window.location.href).searchParams;
+  let title = params.get('title');
 
-  const clientInfo = {
-    userAgent: navigator.userAgent,
-    platform: navigator.platform,
-    version: params.get('version') || 'not-provided',
-  };
+  let toEmail;
+  const locHash = window.location.hash.substr(1);
+  if (locHash) {
+    const hashParams = new URLSearchParams(locHash);
+    toEmail = hashParams.get('toEmail');
+    if (toEmail) {
+      const calcHash = (str) => {
 
-  const output = document.getElementById('output');
+        let hash = 0, i, chr;
+        if (str.length === 0) return hash;
+        for (i = 0; i < str.length; i++) {
+          chr   = str.charCodeAt(i);
+          hash  = ((hash << 5) - hash) + chr;
+          hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
 
-  let parcel;
-  let err;
-  let title = params.get('title') || '';
+      };
+      const hash = calcHash(toEmail);
+      window.localStorage[hash] = toEmail;
+      window.location.hash = `emailHash=${hash}`;
+    } else {
+      const emailHash = hashParams.get('emailHash');
+      toEmail = window.localStorage[emailHash];
+      if (!toEmail) {
+        window.location.href = window.location.href.replace(/#.*$/g, '');
+        return;
+      }
+    }
+  }
 
-  let jsonParcel = params.get('json');
-  if (jsonParcel) {
+  const jsonParcel = params.get('json');
+
+  let report;
+
+  if (!jsonParcel) {
+    window.location.href = 'https://github.com/error-reporter/weer';
+    return;
+  } else {
     try {
-      parcel = JSON.parse(jsonParcel);
+      report = JSON.parse(jsonParcel);
     } catch(e) {
-      parcel = {
+      report = {
         raw: jsonParcel,
         parseError: e.message,
       };
     }
-    parcel = Object.assign(clientInfo, parcel);
-    err = parcel.error || parcel;
+    const payload = report.payload;
+    const err = payload.error || payload;
     title = title || err && err.message || err || 'Untitled';
 
-    output.innerHTML = hljs.highlight(
+    const code = document.getElementById('code');
+    code.innerHTML = hljs.highlight(
       'json',
-      JSON.stringify(parcel, null, 2)
+      JSON.stringify(report, null, 2)
     ).value;
-    document.querySelectorAll('.if-no-error').forEach( (ner) => ner.style.display = 'none' );
-  } else {
-    document.querySelectorAll('.if-error').forEach( (er) => er.style.display = 'none' );
+    document.getElementById('error-description').innerHTML = `
+      Error "<em class="erry bold">${title}</em>" occurred in extension <em class="bold">"${report.extName}" v${report.version}</em>.
+    `;
   }
 
-  //const btnCssText = window.getComputedStyle( document.querySelector('button') ).cssText;
-  //document.querySelectorAll('.btn').forEach( (btn) => btn.style.cssText = btnCssText );
+  document.title = title;
+
+  const getMessage = () => {
+
+    const comment = document.getElementById('comment').value;
+    const body = `I want to report this error:\n\n${window.location.href}\n\n${comment}`;
+    return body;
+
+  };
+
+  if (toEmail) {
+    document.documentElement.classList.add('email-mode');
+    const subject = `REPORT:${title}`;
+    const link = document.getElementById('to-email');
+    link.innerText = toEmail;
+    link.href =
+      `mailto:${toEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(getMessage())}`;
+
+    const form = document.getElementById('report-form');
+    form.action = `https://formspree.io/${toEmail}`;
+    form.onsubmit = () => {
+
+      document.getElementById('comment').value = getMessage();
+      return true;
+
+    };
+  }
+
+  const button = document.createElement('button');
+  document.body.appendChild(button);
+  const btnCssText = window.getComputedStyle( button  ).cssText;
+  document.body.removeChild(button);
+  document.querySelectorAll('.btn').forEach( (btn) => btn.style.cssText = btnCssText );
 
   document.body.style.display = '';
 
-  const ta = document.querySelector('main');
-  document.documentElement.style.background =
-      'linear-gradient(to bottom, black ' +
-      (ta.offsetTop + parseInt(getComputedStyle(ta).height)*0.6) +
-      'px, transparent), black url("./err.jpg") bottom';
-
-}();
+})();

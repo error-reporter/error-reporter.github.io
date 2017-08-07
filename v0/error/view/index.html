@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Report error</title>
+    <meta charset="UTF-8"/>
+    <title>View Error</title>
+    <link rel="icon" href="/icons/favicon.png?adddc">
     <style type="text/css" media="screen">
       html, body {
         margin: 0;
@@ -10,35 +12,24 @@
         min-height: 100%;
       }
       html {
-        background: black;
+        background: #033c88;
         color: white;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
       }
-      body {
-        margin-bottom: 10em;
+      a {
+        color: white;
+        font-weight: bold;
+        font-family: monospace;
       }
-      body > header {
-        padding-top: 1em;
-        padding-left: 2em;
+      .erry {
+        color: red;
+        background-color: black;
       }
-      header.before-data {
-        padding-bottom: 0.7em;
+      .bold {
+        font-weight: bold;
       }
-      h2 {
+      .notop {
         margin-top: 0;
-      }
-      input:checked ~ * {
-        /*color: #dfe20f; /* bright yellow */
-        color: #ffff44;
-        /*color: #98c379; /* mild green */
-      }
-      input:checked ~ .hint {
-        /*color: #d19a66; /* mild brown */
-        color: #98c379
-      }
-      input:not(:checked) ~ * {
-        text-decoration: line-through;
-        color: #aaa;
       }
       pre {
         margin: 0 !important;
@@ -53,48 +44,61 @@
       }
       textarea {
         width: 40em;
-        height: 10em;
+        height: 8em;
         font: inherit;
         font-size: 1rem;
         margin-top: 0.3rem;
+        padding: 0.5em !important;
       }
-      a, a:visited {
-        /*color: #ef1621 red */
-        /*#806eff blue */
-        color: #f4f4f4;
-        text-decoration: none;
-        border-bottom: dotted 1px #aaa;
-      }
-      #output {
+      #code {
         background-color: black;
       }
-      .error-info {
-        padding: 0;
-        padding-bottom: 1em;
+      .centered {
+        text-align: center;
+      }
+      :root.email-mode .if-no-email,
+      :root:not(.email-mode) .if-email
+      {
+        display: none;
       }
     </style>
   </head>
-  <body style="display: none">
-    <h2 style="color:red">Page is under construction!</h2>
-    To report this error send URL of this page to extension authors.
-    <br/>
-    <br/>
-    <header>
-      <h2 class="if-error">Error details</h2>
-    </header>
-    <header class="if-no-error">
-      <h2>Why did you come here?</h2>
-      This page is used for viewing errors, but you came here without any error.
-    </header>
-    <main id="main-error">
-      <ol>
-        <li class="if-error">
-          <ol class='error-info'>
-            <li><pre><code id="output" class='hljs'></code></pre></li>
-          </ol>
-        </li>
-      </ol>
+  <body style="display: none; will-change: contents, display">
+    <h2 class="centered">This is error reporter</h2>
+
+    <main>
+      <div class="centered" id="error-description">...</div>
+      <h2 class="centered">Error details</h2>
+      <pre><code id="code" class='hljs'></code></pre>
+      <div class="if-no-email centered">
+        To report this error email <u>URL of this page</u> to developers together with sequence of actions that trigger the error.
+        <br/>
+      </div>
+      <div class="if-email">
+        <h2 class="centered notop">Wanna report?</h2>
+        <div class="centered">
+          Some information about your OS and browser will be sent (see details above).
+          <br/>
+          <div>
+            To report this error <u>fill the form below</u> or just send URL of this page to <a id="to-email" target="_blank"></a>.
+          </div>
+          <form action="" method="POST" id="report-form">
+  <textarea id="comment" name="message">
+  To trigger this error I do the following:
+    1. Open XXX
+    2. Press YYY
+    3. See the error.
+
+  My email: homerjsimpson@example.com
+  </textarea>
+            <br/>
+            <!--a class="btn" id="submit">Report</a-->
+            <input type="submit" value="Report"/>
+          </form>
+        </div>
+      </div>
     </main>
+
     <link rel="stylesheet" href="./vendor/highlight.js/styles/atom-one-dark.css">
     <script src="./vendor/highlight.js/highlight9.8.0.min.js"></script>
     <script src="./index.js" charset="utf-8" async></script>
