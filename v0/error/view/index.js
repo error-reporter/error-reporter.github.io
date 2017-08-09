@@ -52,11 +52,15 @@
       report = {
         raw: jsonParcel,
         parseError: e.message,
+        payload: e,
       };
+      title = e.message;
     }
-    const payload = report.payload;
-    const err = payload.error || payload;
-    title = title || err && err.message || err || 'Untitled';
+    if (!title) {
+      const payload = report.payload;
+      const err = payload ? (payload.error || payload) : report;
+      title = err && err.message || err || 'Untitled';
+    }
 
     const code = document.getElementById('code');
     code.innerHTML = hljs.highlight(
