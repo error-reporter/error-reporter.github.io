@@ -2,6 +2,7 @@
 // This code is very old, I'm sorry you have to deal with it.
 
 /* global hljs:false */
+
 (function() {
 
   const params = new URL(window.location.href).searchParams;
@@ -67,9 +68,10 @@
       'json',
       JSON.stringify(report, null, 2)
     ).value;
-    document.getElementById('error-description').innerHTML = `
-      Error "<em class="erry bold">${title}</em>" occurred in extension <em class="bold">"${report.extName}" v${report.version}</em>.
-    `;
+    document.getElementById('error-description').innerHTML = {
+      en: `Error "<em class="erry bold">${title}</em>" occurred in extension <em class="bold">"${report.extName}" v${report.version}</em>.`,
+      ru: `Ошибка "<em class="erry bold">${title}</em>" произошла в расширении <em class="bold">"${report.extName}" v${report.version}</em>.`,
+    }[window.LANG];
   }
 
   document.title = title;
@@ -77,7 +79,10 @@
   const getMessage = () => {
 
     const comment = document.getElementById('comment').value;
-    const body = `I want to report this error:\n\n${window.location.href}\n\n${comment}`;
+    const body = {
+      en: `I want to report this error:\n\n${window.location.href}\n\n${comment}`,
+      ru: `Я хочу доложить о следующей ошибке:\n\n${window.location.href}\n\n${comment}`,
+    }[window.REPORT_LANG]
     return body;
 
   };

@@ -21,6 +21,22 @@
         font-weight: bold;
         font-family: monospace;
       }
+      a[href^="mailto"] {
+        text-transform: uppercase;
+        text-decoration: none;
+      }
+      u {
+        text-decoration: none;
+        border-bottom: 1px dashed pink;
+      }
+      em {
+        color: pink;
+      }
+      .red {
+        color: pink;
+        background-color: black;
+        padding: 0 0.5em;
+      }
       .erry {
         color: red;
         background-color: black;
@@ -64,41 +80,95 @@
     </style>
   </head>
   <body style="display: none; will-change: contents, display">
-    <h2 class="centered">This is error reporter</h2>
+    <script>
 
-    <main>
-      <div class="centered" id="error-description">...</div>
-      <h2 class="centered">Error details</h2>
-      <pre><code id="code" class='hljs'></code></pre>
-      <div class="if-no-email centered">
-        To report this error email <u>URL of this page</u> to developers together with sequence of actions that trigger the error.
-        <br/>
-      </div>
-      <div class="if-email">
-        <h2 class="centered notop">Wanna report?</h2>
-        <div class="centered">
-          Some information about your OS and browser will be sent (see details above).
-          <br/>
-          <div>
-            To report this error <u>fill the form below</u> or just send URL of this page to <a id="to-email" target="_blank"></a>.
-          </div>
-          <form action="" method="POST" id="report-form">
-  <textarea id="comment" name="message">
-  To trigger this error I do the following:
-    1. Open XXX
-    2. Press YYY
-    3. See the error.
+      const defaultLang = 'en'
+      window.LANG = defaultLang;
+      {
+        const availableLanguages = ['en', 'ru'];
+        const code = navigator.language.slice(0, 2);
+        if (availableLanguages.includes(code)) {
+          window.LANG = code;
+        }
+      }
 
-  My email: homerjsimpson@example.com
-  </textarea>
+      window.REPORT_LANG = defaultLang;
+      {
+        const availableLanguages = ['en', 'ru'];
+        const params = new URL(window.location.href).searchParams;
+        const reportLangs = (params.get('reportLangs') || '').split(',').filter(
+          (lang) => availableLanguages.includes(lang),
+        );
+        if (reportLangs.includes(window.LANG)) {
+          window.REPORT_LANG = window.LANG;
+        } else {
+          const userLangs = [...new Set(navigator.languages.map((lang) => lang.slice(0, 2)))];
+          if (!reportLangs.includes(defaultLang) || !userLangs.includes(defaultLang)) {
+            window.REPORT_LANG = reportLangs.filter(
+              (lang) => userLangs.includes(lang),
+            )[0] || reportLangs[0];
+            if (!window.REPORT_LANG) {
+              // Ignore reportLangs.
+              window.REPORT_LANG = availableLanguages.includes(window.LANG)
+                ? window.LANG
+                : defaultLang;
+            }
+          }
+        }
+      }
+
+      document.body.innerHTML = `
+        <h2 class="centered">${{ en: 'This is error reporter', ru: 'Доклад об ошибке' }[LANG]}</h2>
+
+        <main>
+          <div class="centered" id="error-description">...</div>
+          <h2 class="centered">${{ en: 'Error details', ru: 'Подробности ошибки' }[LANG]}</h2>
+          <pre><code id="code" class='hljs'></code></pre>
+          <div class="if-no-email centered">
+            ${{
+              en: 'To report this error email <u>URL of this page</u> to developers together with sequence of actions that trigger the error.',
+              ru: 'Чтобы доложить об этой ошибке, отправьте <u>URL-адрес данной страницы</u> разработчикам вместе с описанием действий, приводящих к ошибке.',
+            }[LANG]}
             <br/>
-            <!--a class="btn" id="submit">Report</a-->
-            <input type="submit" value="Report"/>
-          </form>
-        </div>
-      </div>
-    </main>
+          </div>
+          <div class="if-email">
+            <h2 class="centered notop">${{ en: 'Wanna help by reporting?', ru: 'Хотите помочь разработчикам?'}[LANG]}</h2>
+            <div class="centered">
+              ${{
+                en: 'Some information about your OS and browser will be sent (see details above).',
+                ru: 'Будет отправлена некоторая информация о вашей ОС и браузере (см. подробности выше).',
+              }[LANG]}
+              <br/>
+              <div>
+                ${{
+                  en: 'To report this error <span class="red">fill the form below</span> __or__ <span class="red">send URL of this page to ',
+                  ru: 'Чтобы доложить об ошибке, <span class="red">заполните форму ниже</span> __или__ <span class="red">отправьте URL-адрес данной страницы на ',
+                }[LANG]}<a id="to-email" target="_blank"></a></span>.
+              </div>
+              <form action="" method="POST" id="report-form">
+      <textarea id="comment" name="message">${{
+        en: `
+To trigger this error I do the following:
+  1. Open XXX
+  2. Press YYY
+  3. See the error.
 
+My email: homerjsimpson@example.com`,
+        ru: `
+Ошибка возникает после следующих действий:
+  1. Открываю XXX
+  2. Кликаю YYY
+  3. Всплывает уведомление об ошибке.
+
+Мой почтовый адрес: homerjsimpson@example.com`,
+      }[REPORT_LANG].trim()}</textarea>
+                <br/>
+                <input type="submit" value="${{ en: 'Send', ru: 'Отправить' }[LANG]}"/>
+              </form>
+            </div>
+          </div>
+        </main>`;
+    </script>
     <link rel="stylesheet" href="./vendor/highlight.js/styles/atom-one-dark.css">
     <script src="./vendor/highlight.js/highlight9.8.0.min.js"></script>
     <script src="./index.js" charset="utf-8" async></script>
